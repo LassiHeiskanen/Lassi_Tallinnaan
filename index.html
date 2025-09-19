@@ -96,9 +96,13 @@
 
     // === BLOGI GITHUBISTA (yksinkertainen lataus) ===
     // Täytä nämä omilla arvoillasi
-    const BLOG_CFG = { user: 'your-github-username', repo: 'your-repo', branch: 'main', basePath: 'blog' };
-    const RAW_BASE = 'https://raw.githubusercontent.com/' + BLOG_CFG.user + '/' + BLOG_CFG.repo + '/' + BLOG_CFG.branch + '/' + BLOG_CFG.basePath;
-    const INDEX_URL = RAW_BASE + '/index.json';
+   const BLOG_CFG = {
+  user: 'LassiHeiskanen',     // GitHub-käyttäjänimesi
+  repo: 'Lassi_Tallinnaan',   // tämän repon nimi
+  branch: 'main',             // olet main
+  basePath: ''                // <- TYHJÄ, koska tiedostot ovat juurihakemistossa
+};
+
 
     function escapeHtml(txt){
       return txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
