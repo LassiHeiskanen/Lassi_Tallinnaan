@@ -31,14 +31,11 @@
        1) yritä ladata repojuuressa oleva hero.jpg
        2) jos sitä ei ole, käytä moody aerial -fallbackia */
     .hero::before{
-      content:""; position:absolute; inset:0;
-      background:
-        url('hero.jpg'),
-        url('https://unsplash.com/photos/a-view-of-a-city-at-sunset-from-a-high-rise-0mR6KB4eDqM'); /* fallback */
-      background-position:center;
-      background-size:cover;
-      background-repeat:no-repeat;
-      z-index:-2;
+  content:"";
+  position:absolute; inset:0;
+  background:url("./tallinna.jpg") center 35% / cover no-repeat;
+  z-index:-2;
+}
     }
     .hero::after{
       content:""; position:absolute; inset:0;
