@@ -93,6 +93,51 @@
     tick();
 
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // === BLOGI GITHUBISTA (yksinkertainen lataus) ===
+    // Täytä nämä omilla arvoillasi
+    const BLOG_CFG = { user: 'your-github-username', repo: 'your-repo', branch: 'main', basePath: 'blog' };
+    const RAW_BASE = 'https://raw.githubusercontent.com/' + BLOG_CFG.user + '/' + BLOG_CFG.repo + '/' + BLOG_CFG.branch + '/' + BLOG_CFG.basePath;
+    const INDEX_URL = RAW_BASE + '/index.json';
+
+    function escapeHtml(txt){
+      return txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function mdSimpleToHtml(md){
+      // Kevyt muunnos: kappaleet tyhjärivistä, rivinvaihdot <br>
+      let safe = escapeHtml(md);
+      const parts = safe.split('\n\n');
+      const html = parts.map(p=>'<p>' + p.split('\n').join('<br>') + '</p>').join('');
+      return html;
+    }
+    async function fetchJSON(url){ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error(r.status+' '+r.statusText); return r.json(); }
+    async function fetchText(url){ const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error(r.status+' '+r.statusText); return r.text(); }
+
+    async function loadBlog(){
+      const mount = document.getElementById('blog-list');
+      try{
+        const index = await fetchJSON(INDEX_URL);
+        if(!Array.isArray(index) || index.length===0){ mount.innerHTML = '<p style="color:#ffc">Ei blogikirjoituksia vielä.</p>'; return; }
+        index.sort((a,b)=> new Date(b.date) - new Date(a.date));
+        let out = '';
+        for(const post of index){
+          const md = await fetchText(RAW_BASE + '/' + post.slug + '.md');
+          const html = mdSimpleToHtml(md);
+          const d = new Date(post.date);
+          const nice = d.toLocaleDateString('fi-FI',{year:'numeric', month:'long', day:'numeric'});
+          out += '<article class="card" style="margin:14px 0">'
+               + '<h3 style="margin:0 0 8px">'+ (post.title||post.slug) +'</h3>'
+               + '<p style="color:#9db1c7; margin:0 0 10px">'+ nice + (post.tags? ' • '+post.tags.join(', ') : '') +'</p>'
+               + (post.cover? '<img src="'+post.cover+'" alt="'+(post.title||post.slug)+'" style="width:100%; border-radius:12px; border:1px solid var(--ring); margin:6px 0 12px">' : '')
+               + '<div>'+ html +'</div>'
+               + '</article>';
+        }
+        mount.innerHTML = out;
+      }catch(err){
+        document.getElementById('blog-list').innerHTML = '<p style="color:#fbb;">Blogia ei voitu ladata: '+ err.message +'.</p>';
+      }
+    }
+    loadBlog();
   </script>
 </body>
 </html>
