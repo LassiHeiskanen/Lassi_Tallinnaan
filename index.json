@@ -1,15 +1,8 @@
 [
   {
-    "slug": "2025-09-19-aloitus",
-    "title": "Matka alkaa – ensimmäiset kilometrit",
+    "slug": "ekapost",
+    "title": "Matka alkaa – eka postaus",
     "date": "2025-09-19",
-    "tags": ["treeni", "peruskunto"],
-    "cover": "https://.../kuva1.jpg"
-  },
-  {
-    "slug": "2025-10-05-viikkoraportti",
-    "title": "Viikkoraportti #1 – syksyn nousujohteinen treeni",
-    "date": "2025-10-05",
-    "tags": ["raportti"]
+    "tags": ["treeni"]
   }
 ]
