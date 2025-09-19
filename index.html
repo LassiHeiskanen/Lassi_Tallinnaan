@@ -30,33 +30,36 @@
     /* HERO-kuva vain kehyksen sisällä
        1) yritä ladata repojuuressa oleva hero.jpg
        2) jos sitä ei ole, käytä moody aerial -fallbackia */
-    .hero::before{
+/* HERO-kehys pysyy ennallaan (.hero on jo olemassa) */
+
+/* Taustakuva kehyksen sisällä */
+.hero::before{
   content:"";
-  position:absolute; inset:0;
+  position:absolute; inset:0; z-index:-2;
   background:url("./tallinna.jpg") center 35% / cover no-repeat;
-  z-index:-2;
+  /* vaihtoehtoista lisätummennusta suoraan kuvakerrokseen:
+     background-color: rgba(0,0,0,.45);
+     background-blend-mode: multiply; */
 }
-    }
-    .hero::after{
-      content:""; position:absolute; inset:0;
-      background:linear-gradient(180deg, rgba(0,176,202,.25), rgba(0,0,0,.55)); z-index:-1
-    }
-    .hero .content{position:relative; padding: clamp(28px, 6vw, 72px)}
-    .badge{display:inline-block; background:rgba(0,0,0,.55); border:1px solid #2b3a52; padding:6px 12px; border-radius:999px; color:var(--muted); font-weight:700}
-    h1{font-size:clamp(28px, 5vw, 52px); margin:12px 0 6px}
-    .subtitle{max-width:60ch; font-size:clamp(15px, 2.2vw, 20px)}
 
-    .countdown{display:grid; grid-template-columns:repeat(4, minmax(70px, 1fr)); gap:10px; max-width:620px; margin-top:18px}
-    .cd-card{background:rgba(0,0,0,.55); border:1px solid var(--ring); border-radius:14px; padding:14px 12px; text-align:center}
-    .cd-card .num{font-size:clamp(22px, 4vw, 40px); font-weight:900}
-    .cd-card .lbl{color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.1em}
+/* Tummennus/scrim tekstin luettavuudelle */
+.hero::after{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background: linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.85));
+}
 
-    section{margin:38px 0}
-    .card{background:var(--card); border:1px solid var(--ring); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow)}
-    h2{margin:0 0 10px; font-size:clamp(20px, 3vw, 28px)}
-    .list{margin:8px 0 0; padding-left:18px}
+/* Tekstialue hero-kuvan päällä */
+.hero .content{
+  position:relative;
+  padding: clamp(28px, 6vw, 72px);
+  /* valinnainen lisäkorostus tekstille: */
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+}
 
-    footer{margin:50px 0 20px; text-align:center; color:#9db1c7; font-size:14px}
+    
   </style>
 </head>
 <body>
