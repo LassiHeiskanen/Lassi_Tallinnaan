@@ -7,7 +7,8 @@
   <meta name="description" content="Seurantasivu: valmistautuminen ja matka Tallinnan puolimaratonille 2026. Sisältää lähtölaskennan kisapäivään.">
   <style>
     :root{
-      --bg:#0b0f14; --fg:#eaf2ff; --muted:#9db1c7; --brand:#00b0ca; --accent:#f9e300; --card:#111a26; --ring:#22344a; --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.35)
+      --bg:#0b0f14; --fg:#eaf2ff; --muted:#9db1c7; --brand:#00b0ca; --accent:#f9e300;
+      --card:#111a26; --ring:#22344a; --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.35)
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -27,34 +28,51 @@
       position:relative; isolation:isolate; border:1px solid var(--ring);
       border-radius:calc(var(--radius)*1.5); overflow:hidden; box-shadow:var(--shadow)
     }
-    /* Taustakuva kehyksen sisällä */
+    /* Taustakuva kehyksen sisällä — VALEA scrim */
     .hero::before{
       content:""; position:absolute; inset:0; z-index:-2;
       background:url("./tallinna.jpg") center 35% / cover no-repeat;
     }
-    /* Kevyt scrim -> parempi luettavuus, ei liian tumma */
     .hero::after{
       content:""; position:absolute; inset:0; z-index:-1;
-      background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.42));
+      /* selvästi kevyempi kuin ennen */
+      background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.24));
     }
-    /* Tekstialueen kevyt lasiefekti (voit poistaa jos et halua) */
     .hero .content{
       position:relative;
       padding: clamp(28px, 6vw, 72px);
-      background: rgba(0,0,0,.18);
+      /* kevyt lasiefekti, mutta paljon aiempaa vaaleampi */
+      background: rgba(0,0,0,.10);
       backdrop-filter: blur(2px);
-      border: 1px solid rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.05);
       border-radius: 16px;
     }
 
-    .badge{display:inline-block; background:rgba(0,0,0,.55); border:1px solid #2b3a52; padding:6px 12px; border-radius:999px; color:var(--muted); font-weight:700}
-    h1{font-size:clamp(28px, 5vw, 52px); margin:12px 0 6px}
-    .subtitle{max-width:60ch; font-size:clamp(15px, 2.2vw, 20px)}
+    .badge{display:inline-block; background:rgba(0,0,0,.45); border:1px solid #2b3a52; padding:6px 12px; border-radius:999px; color:var(--muted); font-weight:700}
+    h1{font-size:clamp(28px, 5vw, 52px); margin:12px 0 6px; text-shadow:0 6px 24px rgba(0,0,0,.35)}
+    .subtitle{max-width:60ch; font-size:clamp(15px, 2.2vw, 20px); text-shadow:0 3px 14px rgba(0,0,0,.3)}
 
-    .countdown{display:grid; grid-template-columns:repeat(4, minmax(70px, 1fr)); gap:10px; max-width:620px; margin-top:18px}
-    .cd-card{background:rgba(0,0,0,.55); border:1px solid var(--ring); border-radius:14px; padding:14px 12px; text-align:center}
-    .cd-card .num{font-size:clamp(22px, 4vw, 40px); font-weight:900}
-    .cd-card .lbl{color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.1em}
+    /* LASKURI – tyylikäs korttinäkymä */
+    .countdown{
+      display:grid; grid-template-columns:repeat(4, minmax(72px, 1fr));
+      gap:10px; max-width:620px; margin-top:18px
+    }
+    .cd-card{
+      background:rgba(0,0,0,.35);
+      border:1px solid var(--ring);
+      border-radius:14px; padding:14px 12px; text-align:center;
+      backdrop-filter: blur(4px);
+    }
+    .cd-card .num{
+      font-size:clamp(28px, 4.8vw, 56px); font-weight:900; line-height:1.05;
+      /* tasalevyiset numerot → ei hypi */
+      font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1;
+      transition: transform .18s ease, opacity .18s ease;
+    }
+    .cd-card .num.tick{ transform: translateY(-2px); opacity:.9; }
+    .cd-card .lbl{
+      color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.1em
+    }
 
     section{margin:38px 0}
     .card{background:var(--card); border:1px solid var(--ring); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow)}
@@ -96,12 +114,21 @@
   </footer>
 
   <script>
-    /* --- Countdown (UTC-robust) --- */
+    /* --- Countdown (UTC-robust + kevyt animaatio) --- */
     // 12.9.2026 klo 09:00 EEST (UTC+3) = 06:00 UTC
-    const START_UTC = Date.UTC(2026, 8, 12, 6, 0, 0); // months 0-based
+    const START_UTC = Date.UTC(2026, 8, 12, 6, 0, 0);
     const cdEl = document.getElementById('countdown');
+    const prev = {days:null,hours:null,minutes:null,seconds:null};
 
     function pad(n){ return n.toString().padStart(2,'0'); }
+    function setNum(unit, val){
+      const node = cdEl.querySelector(`[data-unit="${unit}"]`);
+      if (node.textContent !== val.toString()){
+        node.textContent = val;
+        node.classList.add('tick');
+        setTimeout(()=>node.classList.remove('tick'), 180);
+      }
+    }
     function updateCountdown(){
       let diff = START_UTC - Date.now();
       if (diff < 0) diff = 0;
@@ -111,10 +138,10 @@
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
 
-      cdEl.querySelector('[data-unit="days"]').textContent = d;
-      cdEl.querySelector('[data-unit="hours"]').textContent = pad(h);
-      cdEl.querySelector('[data-unit="minutes"]').textContent = pad(m);
-      cdEl.querySelector('[data-unit="seconds"]').textContent = pad(s);
+      setNum('days', d);
+      setNum('hours', pad(h));
+      setNum('minutes', pad(m));
+      setNum('seconds', pad(s));
     }
     updateCountdown();
     setInterval(updateCountdown, 1000);
@@ -129,14 +156,13 @@
       basePath: '' // index.json ja .md repon juuressa
     };
 
-    // https://raw.githubusercontent.com/<user>/<repo>/<branch>/<path>
     const RAW_BASE = 'https://raw.githubusercontent.com/'
       + BLOG_CFG.user + '/'
       + BLOG_CFG.repo + '/'
       + BLOG_CFG.branch
       + (BLOG_CFG.basePath ? '/' + BLOG_CFG.basePath : '');
 
-    const BUST = Date.now(); // tuore versio aina
+    const BUST = Date.now();
     const INDEX_URL = `${RAW_BASE}/index.json?v=${BUST}`;
 
     function escapeHtml(txt){
@@ -166,11 +192,9 @@
           mount.innerHTML = '<p style="color:#ffc">Ei blogikirjoituksia vielä (index.json tyhjä).</p>';
           return;
         }
-        index.sort((a,b)=> new Date(b.date) - new Date(a.date)); // uusimmat ensin
-
+        index.sort((a,b)=> new Date(b.date) - new Date(a.date));
         let out = '';
         for(const post of index){
-          // slug = md-tiedoston nimi ilman .md
           const mdURL = `${RAW_BASE}/${post.slug}.md?v=${BUST}`;
           const md = await fetchText(mdURL);
           const html = mdSimpleToHtml(md);
