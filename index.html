@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lassi Tallinnan puolimaratonille 2026</title>
+  <meta name="description" content="Seurantasivu: valmistautuminen ja matka Tallinnan puolimaratonille 2026. Sisältää lähtölaskennan kisapäivään.">
+  <style>
+    :root{
+      --bg:#0b0f14; --fg:#eaf2ff; --muted:#9db1c7; --brand:#00b0ca; --accent:#f9e300; --card:#111a26; --ring:#22344a; --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.35)
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; color:var(--fg); background:radial-gradient(1000px 500px at 20% -10%, #162338 0%, transparent 70%), radial-gradient(1000px 500px at 120% 0, #0f1b2c 0%, transparent 60%), var(--bg)}
+    a{color:var(--brand)}
+    .wrap{max-width:900px; margin:0 auto; padding:24px}
+
+    header{margin-top:16px}
+    .hero{position:relative; isolation:isolate; border:1px solid var(--ring); border-radius:calc(var(--radius)*1.5); overflow:hidden; box-shadow:var(--shadow)}
+    .hero::before{content:""; position:absolute; inset:0; background:url('https://tse3.mm.bing.net/th/id/OIP.QUyAhiNVR07ajWE1Ts2gCAHaHa?r=0&pid=Api') center/cover no-repeat; z-index:-2}
+    .hero::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,176,202,.25), rgba(0,0,0,.55)); z-index:-1}
+    .hero .content{position:relative; padding: clamp(28px, 6vw, 72px)}
+    .badge{display:inline-block; background:rgba(0,0,0,.55); border:1px solid #2b3a52; padding:6px 12px; border-radius:999px; color:var(--muted); font-weight:700}
+    h1{font-size:clamp(28px, 5vw, 52px); margin:12px 0 6px}
+    .subtitle{max-width:60ch; font-size:clamp(15px, 2.2vw, 20px)}
+
+    .countdown{display:grid; grid-template-columns:repeat(4, minmax(70px, 1fr)); gap:10px; max-width:620px; margin-top:18px}
+    .cd-card{background:rgba(0,0,0,.55); border:1px solid var(--ring); border-radius:14px; padding:14px 12px; text-align:center}
+    .cd-card .num{font-size:clamp(22px, 4vw, 40px); font-weight:900}
+    .cd-card .lbl{color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.1em}
+
+    section{margin:38px 0}
+    .card{background:var(--card); border:1px solid var(--ring); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow)}
+    h2{margin:0 0 10px; font-size:clamp(20px, 3vw, 28px)}
+    .list{margin:8px 0 0; padding-left:18px}
+
+    footer{margin:50px 0 20px; text-align:center; color:var(--muted); font-size:14px}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <div class="content">
+        <span class="badge">Road to Tallinn 2026</span>
+        <h1>Lassi Tallinnan puolimaratonille 2026</h1>
+        <p class="subtitle">Tälle sivulle kerään tarinaa valmistautumisesta ja matkasta Tallinnan puolimaratonille. Alla lähtölaskenta kisapäivään.</p>
+
+        <div class="countdown" id="countdown" aria-live="polite">
+          <div class="cd-card"><div class="num" data-unit="days">—</div><div class="lbl">päivää</div></div>
+          <div class="cd-card"><div class="num" data-unit="hours">—</div><div class="lbl">tuntia</div></div>
+          <div class="cd-card"><div class="num" data-unit="minutes">—</div><div class="lbl">minuuttia</div></div>
+          <div class="cd-card"><div class="num" data-unit="seconds">—</div><div class="lbl">sekuntia</div></div>
+        </div>
+        <p style="margin-top:10px; color:#d6e6ff">⏱️ Startti: <strong>lauantai 12.9.2026 klo 09:00</strong> (Tallinna, EEST)</p>
+        <p style="margin-top:0; color:#c6d7eb">Lähde: Swedbank Tallinn Marathonin virallinen some (12.–13.9.2026 tapahtumapäivät; puolimaraton lauantaisin klo 09:00).</p>
+      </div>
+    </header><section class="card" id="blog-section">
+      <h2>Blogikirjoitukset</h2>
+      <div id="blog-list" aria-live="polite">
+        <p style="color:#cfe0f5">Ladataan blogia GitHubista…</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="wrap">
+    <p>© <span id="year"></span> Road to Tallinn • Sivua päivitetään pitkin vuotta.</p>
+  </footer>
+
+  <script>
+    // LÄHTÖAIKA (Tallinna EEST, UTC+3). Virallinen some ilmoittaa viikonlopun 11–13.9.2026; puolimaraton on lauantaina klo 09:00.
+    const START_ISO = '2026-09-12T09:00:00+03:00';
+
+    function tick(){
+      const now = new Date();
+      const start = new Date(START_ISO);
+      const diff = start - now;
+      const el = document.getElementById('countdown');
+      const pad = n => n.toString().padStart(2,'0');
+      let d=0,h=0,m=0,s=0;
+      if(diff>0){
+        s = Math.floor(diff/1000);
+        m = Math.floor(s/60); s%=60;
+        h = Math.floor(m/60); m%=60;
+        d = Math.floor(h/24); h%=24;
+      }
+      el.querySelector('[data-unit="days"]').textContent = d;
+      el.querySelector('[data-unit="hours"]').textContent = pad(h);
+      el.querySelector('[data-unit="minutes"]').textContent = pad(m);
+      el.querySelector('[data-unit="seconds"]').textContent = pad(s);
+      requestAnimationFrame(tick);
+    }
+    tick();
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
