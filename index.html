@@ -26,11 +26,10 @@
       position:relative; isolation:isolate; border:1px solid var(--ring);
       border-radius:calc(var(--radius)*1.5); overflow:hidden; box-shadow:var(--shadow)
     }
-    /* HERO-kuva vain kehyksen sisällä */
+    /* HERO-kuva vain kehyksen sisällä (moody ilmakuva Tallinnasta) */
     .hero::before{
       content:""; position:absolute; inset:0;
-      /* Tallinnaan liittyvä kuva – vaihda halutessasi */
-      background:url('https://tse3.mm.bing.net/th/id/OIP.QUyAhiNVR07ajWE1Ts2gCAHaHa?r=0&pid=Api') center/cover no-repeat;
+      background:url('https://source.unsplash.com/6t91NtWXlco/1600x900') center/cover no-repeat;
       z-index:-2
     }
     .hero::after{
@@ -52,7 +51,7 @@
     h2{margin:0 0 10px; font-size:clamp(20px, 3vw, 28px)}
     .list{margin:8px 0 0; padding-left:18px}
 
-    footer{margin:50px 0 20px; text-align:center; color:var(--muted); font-size:14px}
+    footer{margin:50px 0 20px; text-align:center; color:#9db1c7; font-size:14px}
   </style>
 </head>
 <body>
@@ -86,106 +85,100 @@
     <p>© <span id="year"></span> Road to Tallinn • Sivua päivitetään pitkin vuotta.</p>
   </footer>
 
- <script>
-  /* --- Countdown --- */
-  const START_ISO = '2026-09-12T09:00:00+03:00';
-  function tick(){
-    const now = new Date();
-    const start = new Date(START_ISO);
-    const diff = start - now;
-    const el = document.getElementById('countdown');
-    const pad = n => n.toString().padStart(2,'0');
-    let d=0,h=0,m=0,s=0;
-    if(diff>0){
-      s = Math.floor(diff/1000);
-      m = Math.floor(s/60); s%=60;
-      h = Math.floor(m/60); m%=60;
-      d = Math.floor(h/24); h%=24;
-    }
-    el.querySelector('[data-unit="days"]').textContent = d;
-    el.querySelector('[data-unit="hours"]').textContent = pad(h);
-    el.querySelector('[data-unit="minutes"]').textContent = pad(m);
-    el.querySelector('[data-unit="seconds"]').textContent = pad(s);
-    requestAnimationFrame(tick);
-  }
-  tick();
-  document.getElementById('year').textContent = new Date().getFullYear();
-
-  /* --- Blogi GitHubista --- */
-  const BLOG_CFG = {
-    user: 'LassiHeiskanen',
-    repo: 'Lassi_Tallinnaan',
-    branch: 'main',
-    basePath: '' // koska index.json ja .md ovat juurihakemistossa
-  };
-
-  // Käytetään jsDelivriä (CORS-ystävällinen). Polku: https://cdn.jsdelivr.net/gh/<user>/<repo>@<branch>/<path>
-  const CDN_BASE = 'https://cdn.jsdelivr.net/gh/'
-    + BLOG_CFG.user + '/'
-    + BLOG_CFG.repo + '@'
-    + BLOG_CFG.branch
-    + (BLOG_CFG.basePath ? '/' + BLOG_CFG.basePath : '');
-
-  const INDEX_URL = CDN_BASE + '/index.json';
-
-  function escapeHtml(txt){
-    return txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-  function mdSimpleToHtml(md){
-    // Kevyt muunnos: kappaleet tyhjärivistä, rivinvaihdot <br>
-    let safe = escapeHtml(md);
-    const parts = safe.split('\n\n');
-    return parts.map(p => '<p>' + p.split('\n').join('<br>') + '</p>').join('');
-  }
-  async function fetchJSON(url){
-    console.log('[BLOG] fetch index:', url);
-    const r = await fetch(url, {cache:'no-store'});
-    if(!r.ok) throw new Error(`${r.status} ${r.statusText} @ ${url}`);
-    return r.json();
-  }
-  async function fetchText(url){
-    console.log('[BLOG] fetch post:', url);
-    const r = await fetch(url, {cache:'no-store'});
-    if(!r.ok) throw new Error(`${r.status} ${r.statusText} @ ${url}`);
-    return r.text();
-  }
-
-  async function loadBlog(){
-    const mount = document.getElementById('blog-list');
-    try{
-      const index = await fetchJSON(INDEX_URL);
-      if(!Array.isArray(index) || index.length===0){
-        mount.innerHTML = '<p style="color:#ffc">Ei blogikirjoituksia vielä (index.json tyhjä).</p>';
-        return;
+  <script>
+    /* --- Countdown --- */
+    const START_ISO = '2026-09-12T09:00:00+03:00';
+    function tick(){
+      const now = new Date();
+      const start = new Date(START_ISO);
+      const diff = start - now;
+      const el = document.getElementById('countdown');
+      const pad = n => n.toString().padStart(2,'0');
+      let d=0,h=0,m=0,s=0;
+      if(diff>0){
+        s = Math.floor(diff/1000);
+        m = Math.floor(s/60); s%=60;
+        h = Math.floor(m/60); m%=60;
+        d = Math.floor(h/24); h%=24;
       }
-      // uusimmat ensin
-      index.sort((a,b)=> new Date(b.date) - new Date(a.date));
-
-      let out = '';
-      for(const post of index){
-        // HUOM: slugin on vastattava md-tiedoston nimeä ilman .md
-        const mdURL = CDN_BASE + '/' + post.slug + '.md';
-        const md = await fetchText(mdURL);
-        const html = mdSimpleToHtml(md);
-        const d = new Date(post.date);
-        const nice = isNaN(d) ? post.date : d.toLocaleDateString('fi-FI',{year:'numeric', month:'long', day:'numeric'});
-        out += '<article class="card" style="margin:14px 0">'
-             + '<h3 style="margin:0 0 8px">'+ (post.title||post.slug) +'</h3>'
-             + '<p style="color:#9db1c7; margin:0 0 10px">'+ nice + (post.tags? ' • '+post.tags.join(', ') : '') +'</p>'
-             + (post.cover? '<img src="'+post.cover+'" alt="'+(post.title||post.slug)+'" style="width:100%; border-radius:12px; border:1px solid var(--ring); margin:6px 0 12px">' : '')
-             + '<div>'+ html +'</div>'
-             + '</article>';
-      }
-      mount.innerHTML = out;
-    }catch(err){
-      console.error(err);
-      document.getElementById('blog-list').innerHTML =
-        '<p style="color:#fbb;">Blogia ei voitu ladata: '+ escapeHtml(String(err)) +'.</p>'
-        + '<p style="color:#cfe0f5; font-size:12px">Vinkki: avaa Konsoli (F12 → Console) nähdäksesi tarkat URLit ja virheet.</p>';
+      el.querySelector('[data-unit="days"]').textContent = d;
+      el.querySelector('[data-unit="hours"]').textContent = pad(h);
+      el.querySelector('[data-unit="minutes"]').textContent = pad(m);
+      el.querySelector('[data-unit="seconds"]').textContent = pad(s);
+      requestAnimationFrame(tick);
     }
-  }
-  loadBlog();
-</script>
+    tick();
+    document.getElementById('year').textContent = new Date().getFullYear();
 
+    /* --- Blogi GitHubista (jsDelivr + cache-busting) --- */
+    const BLOG_CFG = {
+      user: 'LassiHeiskanen',
+      repo: 'Lassi_Tallinnaan',
+      branch: 'main',
+      basePath: '' // index.json ja .md repon juuressa
+    };
+
+    // https://cdn.jsdelivr.net/gh/<user>/<repo>@<branch>/<path>
+    const CDN_BASE = 'https://cdn.jsdelivr.net/gh/'
+      + BLOG_CFG.user + '/'
+      + BLOG_CFG.repo + '@'
+      + BLOG_CFG.branch
+      + (BLOG_CFG.basePath ? '/' + BLOG_CFG.basePath : '');
+
+    const BUST = Date.now(); // tuore versio aina
+    const INDEX_URL = `${CDN_BASE}/index.json?v=${BUST}`;
+
+    function escapeHtml(txt){
+      return txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function mdSimpleToHtml(md){
+      let safe = escapeHtml(md);
+      const parts = safe.split('\n\n');
+      return parts.map(p => '<p>' + p.split('\n').join('<br>') + '</p>').join('');
+    }
+    async function fetchJSON(url){
+      const r = await fetch(url, {cache:'no-store'});
+      if(!r.ok) throw new Error(`${r.status} ${r.statusText} @ ${url}`);
+      return r.json();
+    }
+    async function fetchText(url){
+      const r = await fetch(url, {cache:'no-store'});
+      if(!r.ok) throw new Error(`${r.status} ${r.statusText} @ ${url}`);
+      return r.text();
+    }
+
+    async function loadBlog(){
+      const mount = document.getElementById('blog-list');
+      try{
+        const index = await fetchJSON(INDEX_URL);
+        if(!Array.isArray(index) || index.length===0){
+          mount.innerHTML = '<p style="color:#ffc">Ei blogikirjoituksia vielä (index.json tyhjä).</p>';
+          return;
+        }
+        index.sort((a,b)=> new Date(b.date) - new Date(a.date)); // uusimmat ensin
+
+        let out = '';
+        for(const post of index){
+          // slug = md-tiedoston nimi ilman .md
+          const mdURL = `${CDN_BASE}/${post.slug}.md?v=${BUST}`;
+          const md = await fetchText(mdURL);
+          const html = mdSimpleToHtml(md);
+          const d = new Date(post.date);
+          const nice = isNaN(d) ? post.date : d.toLocaleDateString('fi-FI',{year:'numeric', month:'long', day:'numeric'});
+          out += '<article class="card" style="margin:14px 0">'
+               + '<h3 style="margin:0 0 8px">'+ (post.title||post.slug) +'</h3>'
+               + '<p style="color:#9db1c7; margin:0 0 10px">'+ nice + (post.tags? ' • '+post.tags.join(', ') : '') +'</p>'
+               + '<div>'+ html +'</div>'
+               + '</article>';
+        }
+        mount.innerHTML = out;
+      }catch(err){
+        document.getElementById('blog-list').innerHTML =
+          '<p style="color:#fbb;">Blogia ei voitu ladata: '+ escapeHtml(String(err)) +'.</p>'
+          + '<p style="color:#cfe0f5; font-size:12px">Vinkki: avaa Konsoli (F12 → Console) nähdäksesi tarkat URLit ja virheet.</p>';
+      }
+    }
+    loadBlog();
+  </script>
 </body>
 </html>
